@@ -32,3 +32,15 @@ class UsuarioCriarModel(BaseModel):
                 "foto": "fulano.png"
             }
         }
+
+class UsuarioLoginModel(BaseModel):
+    email: EmailStr = Field(...)
+    senha: str = Field(...)
+
+    class Config:
+        schema_extra = {
+            "usuario": {
+                "email": "fulano@gmail.com",
+                "senha": "senha123!"
+            }
+        }

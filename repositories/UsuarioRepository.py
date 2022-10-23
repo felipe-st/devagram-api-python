@@ -4,6 +4,7 @@ from bson import ObjectId
 from decouple import config
 
 from models.UsuarioModel import UsuarioModel, UsuarioCriarModel
+from utils.AuthUtil import gerar_senha_criptografada
 
 MONGODB_URL = config("MONGODB_URL")
 
@@ -23,6 +24,8 @@ def usuario_helper(usuario):
     }
 
 async def criar_usuario(usuario: UsuarioCriarModel) -> dict:
+    usuario.senha = gerar_senha_criptografada(usuario.senha)
+
     usuario_criado = await usuario_collection.insert_one(usuario.__dict__)
 
     novo_usuario = await usuario_collection.find_one({"_id": usuario_criado.inserted_id})
