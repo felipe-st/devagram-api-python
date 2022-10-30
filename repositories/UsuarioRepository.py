@@ -35,6 +35,12 @@ async def criar_usuario(usuario: UsuarioCriarModel) -> dict:
 async def listar_usuarios():
     return usuario_collection.find()
 
+async def buscar_usuario(id: str) -> dict:
+    usuario = await usuario_collection.find_one({"_id": ObjectId(id)})
+
+    if usuario:
+        return usuario_helper(usuario)
+
 async def buscar_usuario_por_email(email: str) -> dict:
     usuario = await usuario_collection.find_one({"email": email})
 

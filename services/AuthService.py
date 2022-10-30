@@ -29,11 +29,8 @@ def decodificar_token_jwt(token: str):
         else:
             return None
     except Exception as erro:
-        return {
-            "mensagem": "Erro interno no servidor",
-            "dados": str(erro),
-            "status": 500
-        }
+        print(erro)
+        return None
 
 
 async def login_service(usuario: UsuarioLoginModel):
