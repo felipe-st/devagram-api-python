@@ -23,7 +23,7 @@ class AWSProvider:
                 Params={'Bucket': bucket, 'Key': caminho_para_salvar}
             )
 
-            return url
+            return str(url).split('?')[0]
         except ClientError as erro:
             print(erro)
             return False

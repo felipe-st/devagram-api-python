@@ -55,7 +55,11 @@ async def atualizar_usuario(id: str, dados_usuario: dict):
             {"_id": ObjectId(id)}, {"$set": dados_usuario }
         )
 
-        return usuario_helper(usuario_atualizado)
+        usuario_encontrado = await usuario_collection.find_one({
+            "_id": ObjectId(id)
+        })
+
+        return usuario_helper(usuario_encontrado)
 
 async def deletar_usuario(id: str):
     usuario = await usuario_collection.find_one({"_id": ObjectId(id)})

@@ -29,7 +29,7 @@ async def registrar_usuario(usuario: UsuarioCriarModel, caminho_foto):
                 caminho_foto
             )
 
-            novo_usuario = await atualizar_usuario(novo_usuario["id"], {"foto", url_foto})
+            novo_usuario = await atualizar_usuario(novo_usuario["id"], {"foto": url_foto})
 
             print(novo_usuario)
 
