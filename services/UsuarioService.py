@@ -1,4 +1,5 @@
 from models.UsuarioModel import UsuarioCriarModel
+from providers.AWSProvider import AWSProvider
 from repositories.UsuarioRepository import (
     criar_usuario,
     buscar_usuario_por_email,
@@ -8,7 +9,9 @@ from repositories.UsuarioRepository import (
     deletar_usuario
 )
 
-async def registrar_usuario(usuario: UsuarioCriarModel):
+awsProvider = AWSProvider()
+
+async def registrar_usuario(usuario: UsuarioCriarModel, caminho_foto):
     try:
         usuario_encontrado = await buscar_usuario_por_email(usuario.email)
 
@@ -20,6 +23,16 @@ async def registrar_usuario(usuario: UsuarioCriarModel):
             }
         else:
             novo_usuario = await criar_usuario(usuario)
+
+            url_foto = awsProvider.upload_arquivo_s3(
+                f'fotos-perfil/{novo_usuario["id"]}.png',
+                caminho_foto
+            )
+
+            novo_usuario = await atualizar_usuario(novo_usuario["id"], {"foto", url_foto})
+
+            print(novo_usuario)
+
             return {
                 "mensagem": "Usuario cadastrado com sucesso",
                 "dados": novo_usuario,
@@ -33,17 +46,15 @@ async def registrar_usuario(usuario: UsuarioCriarModel):
         }
 
 
-async def buscar_usuario(id: str):
+async def buscar_usuario_logado(id: str):
     try:
         usuario_encontrado = await buscar_usuario(id)
 
         if usuario_encontrado:
-            return usuario_encontrado
-        else:
             return {
-                "mensagem": f'Usuario com o id {id} não foi encontrado',
-                "dados": "",
-                "status": 404
+                "mensagem": f'Usuario encontrado',
+                "dados": usuario_encontrado,
+                "status": 200
             }
     except Exception as erro:
         print(erro)

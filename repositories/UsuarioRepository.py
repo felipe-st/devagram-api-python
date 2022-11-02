@@ -20,7 +20,7 @@ def usuario_helper(usuario):
         "nome": usuario["nome"],
         "email": usuario["email"],
         "senha": usuario["senha"],
-        "foto": usuario["foto"]
+        "foto": usuario["foto"] if "foto" in usuario else ""
     }
 
 async def criar_usuario(usuario: UsuarioCriarModel) -> dict:
