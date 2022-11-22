@@ -1,6 +1,8 @@
 import os
 from datetime import datetime
 
+from bson import ObjectId
+
 from models.UsuarioModel import UsuarioCriarModel, UsuarioAtualizarModel
 from providers.AWSProvider import AWSProvider
 from repositories.UsuarioRepository import UsuarioRepository
@@ -102,5 +104,37 @@ class UsuarioService:
             return {
                 "mensagem": "Erro interno no servidor",
                 "dados": str(erro),
+                "status": 500
+            }
+
+
+    async def follow_unfollow_usuario(self, usuario_logado_id, usuario_id):
+        try:
+            usuario_encontrado = await usuarioRepository.buscar_usuario(usuario_id)
+            usuario_logado_encontrado = await usuarioRepository.buscar_usuario(usuario_logado_id)
+
+            if usuario_encontrado["seguidores"].count(usuario_logado_id) > 0:
+                usuario_encontrado["seguidores"].remove(usuario_logado_id)
+                usuario_logado_encontrado["seguindo"].remove(usuario_id)
+            else:
+                usuario_encontrado["seguidores"].append(ObjectId(usuario_logado_id))
+                usuario_logado_encontrado["seguindo"].append(ObjectId(usuario_id))
+
+            await usuarioRepository.atualizar_usuario(
+                usuario_encontrado["id"],
+                {"seguidores": usuario_encontrado["seguidores"]})
+            await usuarioRepository.atualizar_usuario(usuario_logado_encontrado["id"], {
+                "seguindo": usuario_logado_encontrado["seguindo"]})
+
+            return {
+                "mensagem": "Requisição realizada com sucesso!",
+                "dados": "",
+                "status": 200
+            }
+
+        except Exception as error:
+            return {
+                "mensagem": "Erro interno no servidor",
+                "dados": str(error),
                 "status": 500
             }

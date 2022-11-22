@@ -67,6 +67,29 @@ class PostagemService:
             }
 
 
+    async def listar_postagens_usuario(self, usuario_id):
+        try:
+            postagens = await postagemRepository.listar_postagens_usuario(usuario_id)
+
+            for p in postagens:
+                p["total_curtidas"] = len(p["curtidas"])
+                p["total_comentarios"] = len(p["comentarios"])
+
+            return {
+                "mensagem": "Postagens listadas com sucesso",
+                "dados": postagens,
+                "status": 200
+            }
+        except Exception as erro:
+            print(erro)
+            return {
+                "mensagem": "Erro interno no servidor",
+                "dados": str(erro),
+                "status": 500
+            }
+
+
+
     async def curtir_descurtir(self, postagem_id, usuario_id):
         try:
             postagem_encontrada = await postagemRepository.buscar_postagem(postagem_id)
@@ -121,3 +144,36 @@ class PostagemService:
                 "status": 500
             }
 
+
+    async def deletar_postagem(self, postagem_id, usuario_id):
+        try:
+            postagem_encontrada = await postagemRepository.buscar_postagem(postagem_id)
+
+            if not postagem_encontrada:
+                return {
+                    "mensagem": "Postagem não encontrada",
+                    "dados": "",
+                    "status": 404
+                }
+
+            if not postagem_encontrada["usuario_id"] == usuario_id:
+                return {
+                    "mensagem": "Não é possível realizar essa requisição",
+                    "dados": "",
+                    "status": 401
+                }
+
+            await postagemRepository.deletar_postagem(postagem_id)
+
+            return {
+                "mensagem": "Postagem deletada com sucesso!",
+                "dados": "",
+                "status": 200
+            }
+
+        except Exception as error:
+            return {
+                "mensagem": "Erro interno no servidor",
+                "dados": str(error),
+                "status": 500
+            }

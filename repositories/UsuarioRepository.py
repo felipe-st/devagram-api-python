@@ -22,7 +22,15 @@ class UsuarioRepository:
     async def criar_usuario(self, usuario: UsuarioCriarModel) -> dict:
         usuario.senha = gerar_senha_criptografada(usuario.senha)
 
-        usuario_criado = await usuario_collection.insert_one(usuario.__dict__)
+        usuario_dict = {
+            "nome": usuario.nome,
+            "email": usuario.email,
+            "senha": usuario.senha,
+            "seguidores": [],
+            "seguindo": []
+        }
+
+        usuario_criado = await usuario_collection.insert_one(usuario_dict)
 
         novo_usuario = await usuario_collection.find_one({"_id": usuario_criado.inserted_id})
 

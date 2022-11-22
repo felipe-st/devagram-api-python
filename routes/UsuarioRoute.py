@@ -67,3 +67,21 @@ async def atualizar_usuario_logado(Authorization: str = Header(default=''), usua
         return resultado
     except:
         raise HTTPException(status_code=500, detail='Erro interno do servidor.')
+
+
+@router.put('/seguir/{usuario_id}',
+            response_description="Rota para follow/unfollow em um usuario",
+            dependencies=[Depends(verificar_token)]
+)
+async def follow_unfollow_uusario(usuario_id: str, Authorization: str = Header(default='')):
+    token = Authorization.split(' ')[1]
+    payload = decodificar_token_jwt(token)
+    resultado_usuario = await usuarioService.buscar_usuario_logado(payload["usuario_id"])
+    usuario_logado = resultado_usuario["dados"]
+
+    resultado = await usuarioService.follow_unfollow_usuario(usuario_logado["id"], usuario_id)
+
+    if not resultado["status"] == 200:
+        raise HTTPException(status_code=resultado["status"], detail=resultado["mensagem"])
+
+    return resultado

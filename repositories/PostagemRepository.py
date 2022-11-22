@@ -69,6 +69,31 @@ class PostagemRepository:
         return postagens
 
 
+    async def listar_postagens_usuario(self, usuario_id):
+        postagens_encontradas = postagem_collection.aggregate([
+            {
+                "$match": {
+                    "usuario_id": ObjectId(usuario_id)
+                }
+            },
+            {
+                "$lookup": {
+                    "from": "usuario",
+                    "localField": "usuario_id",
+                    "foreignField": "_id",
+                    "as": "usuario"
+            }
+        }])
+
+        postagens = []
+
+        async for postagem in postagens_encontradas:
+            postagens.append(converterUtil.postagem_converter(postagem))
+
+        return postagens
+
+
+
     async def buscar_postagem(self, id: str) -> dict:
         postagem = await postagem_collection.find_one({"_id": ObjectId(id)})
 

@@ -5,7 +5,9 @@ class ConverterUtil:
             "nome": usuario["nome"],
             "email": usuario["email"],
             "senha": usuario["senha"],
-            "foto": usuario["foto"] if "foto" in usuario else ""
+            "foto": usuario["foto"] if "foto" in usuario else "",
+            "seguidores": [str(p) for p in usuario["seguidores"]] if "seguidores" in usuario else "",
+            "seguindo": [str(p) for p in usuario["seguindo"]] if "seguindo" in usuario else ""
         }
 
 
