@@ -38,7 +38,41 @@ async def buscar_info_usuario_logado(Authorization: str = Header(default='')):
 
         payload = decodificar_token_jwt(token)
 
-        resultado = await usuarioService.buscar_usuario_logado(payload["usuario_id"])
+        resultado = await usuarioService.buscar_usuario(payload["usuario_id"])
+
+        if not resultado['status'] == 200:
+            raise HTTPException(status_code=resultado['status'], detail=resultado['mensagem'])
+
+        return resultado
+    except:
+        raise HTTPException(status_code=500, detail='Erro interno do servidor.')
+
+
+@router.get(
+    '/{usuario_id}',
+    response_description='Rota para buscar as informações do usuário logado',
+    dependencies=[Depends(verificar_token)]
+    )
+async def buscar_info_usuario(usuario_id: str):
+    try:
+        resultado = await usuarioService.buscar_usuario(usuario_id)
+
+        if not resultado['status'] == 200:
+            raise HTTPException(status_code=resultado['status'], detail=resultado['mensagem'])
+
+        return resultado
+    except:
+        raise HTTPException(status_code=500, detail='Erro interno do servidor.')
+
+
+@router.get(
+    '/',
+    response_description='Rota para listar todos os usuários',
+    dependencies=[Depends(verificar_token)]
+    )
+async def listar_usuarios(nome: str):
+    try:
+        resultado = await usuarioService.listar_usuarios(nome)
 
         if not resultado['status'] == 200:
             raise HTTPException(status_code=resultado['status'], detail=resultado['mensagem'])
@@ -76,7 +110,7 @@ async def atualizar_usuario_logado(Authorization: str = Header(default=''), usua
 async def follow_unfollow_uusario(usuario_id: str, Authorization: str = Header(default='')):
     token = Authorization.split(' ')[1]
     payload = decodificar_token_jwt(token)
-    resultado_usuario = await usuarioService.buscar_usuario_logado(payload["usuario_id"])
+    resultado_usuario = await usuarioService.buscar_usuario(payload["usuario_id"])
     usuario_logado = resultado_usuario["dados"]
 
     resultado = await usuarioService.follow_unfollow_usuario(usuario_logado["id"], usuario_id)

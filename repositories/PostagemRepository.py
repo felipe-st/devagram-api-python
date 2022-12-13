@@ -1,4 +1,5 @@
 from datetime import datetime
+from typing import List
 
 import motor.motor_asyncio
 from bson import ObjectId
@@ -82,8 +83,9 @@ class PostagemRepository:
                     "localField": "usuario_id",
                     "foreignField": "_id",
                     "as": "usuario"
+                }
             }
-        }])
+        ])
 
         postagens = []
 
@@ -94,7 +96,7 @@ class PostagemRepository:
 
 
 
-    async def buscar_postagem(self, id: str) -> dict:
+    async def buscar_postagem(self, id: str) -> PostagemModel:
         postagem = await postagem_collection.find_one({"_id": ObjectId(id)})
 
         if postagem:

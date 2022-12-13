@@ -1,3 +1,4 @@
+import json
 import os
 from datetime import datetime
 
@@ -124,11 +125,15 @@ class PostagemService:
             postagem_encontrada = await postagemRepository.buscar_postagem(postagem_id)
 
             postagem_encontrada["comentarios"].append({
+                "comentario_id": ObjectId(),
                 "usuario_id": ObjectId(usuario_id),
                 "comentario:": comentario
             })
 
-            postagem_atualizada = await postagemRepository.atualizar_postagem(postagem_encontrada["id"], {"comentarios": postagem_encontrada["comentarios"]})
+            postagem_atualizada = await postagemRepository.atualizar_postagem(
+                postagem_encontrada["id"],
+                {"comentarios": postagem_encontrada["comentarios"]}
+            )
 
 
             return {
@@ -144,6 +149,68 @@ class PostagemService:
                 "status": 500
             }
 
+
+    async def deletar_comentario(self, postagem_id, usuario_id, comentario_id):
+        try:
+            postagem_encontrada = await postagemRepository.buscar_postagem(postagem_id)
+
+            for comentario in postagem_encontrada["comentarios"]:
+                if comentario["comentario_id"] == comentario_id:
+                    if not (comentario["usuario_id"] == usuario_id or postagem_encontrada['usuario_id'] == usuario_id):
+                        return {
+                                "mensagem": "Requisição inválida",
+                                "dados": "",
+                                "status": 401
+                        }
+
+                    postagem_encontrada["comentarios"].remove(comentario)
+
+            postagem_atualizada = await postagemRepository.atualizar_postagem(postagem_encontrada["id"], {"comentarios": postagem_encontrada["comentarios"]})
+
+
+            return {
+                "mensagem": "Comentario deletado com sucesso",
+                "dados": postagem_atualizada,
+                "status": 200
+            }
+
+        except Exception as error:
+            return {
+                "mensagem": "Erro interno no servidor",
+                "dados": str(error),
+                "status": 500
+            }
+
+    async def atualizar_comentario(self, postagem_id, usuario_id, comentario_id, comentario_atualizado):
+        try:
+            postagem_encontrada = await postagemRepository.buscar_postagem(postagem_id)
+
+            for comentario in postagem_encontrada["comentarios"]:
+                if comentario["comentario_id"] == comentario_id:
+                    if not comentario["usuario_id"] == usuario_id:
+                        return {
+                            "mensagem": "Requisição inválida",
+                            "dados": "",
+                            "status": 401
+                        }
+
+                    comentario["comentario"] = comentario_atualizado
+
+            postagem_atualizada = await postagemRepository.atualizar_postagem(postagem_encontrada["id"],
+                                                                              {"comentarios": postagem_encontrada["comentarios"]})
+
+            return {
+                "mensagem": "Comentario atualizado com sucesso",
+                "dados": postagem_atualizada,
+                "status": 200
+            }
+
+        except Exception as error:
+            return {
+                "mensagem": "Erro interno no servidor",
+                "dados": str(error),
+                "status": 500
+            }
 
     async def deletar_postagem(self, postagem_id, usuario_id):
         try:
